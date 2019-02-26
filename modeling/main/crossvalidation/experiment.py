@@ -9,6 +9,7 @@ import numpy as np
 import keras
 from sklearn.linear_model import RidgeCV, LogisticRegressionCV
 from sklearn.model_selection import KFold
+from nltk.tokenize import wordpunct_tokenize as tokenize
 
 ## extra imports to set GPU options
 import tensorflow as tf
@@ -45,9 +46,14 @@ results_df=pd.DataFrame(
 
 embs=common.get_facebook_fasttext_common_crawl(vocab_limit=None)
 
+# Based on column names in df, determine if empathy/vad.
+dataset = 'vad_eb' if 'text' in data else 'empathy'
 TARGETS=['empathy', 'distress']
 
 
+if dataset == 'vad_eb':
+	TARGETS=['V', 'A', 'D']
+	data['essay']=data.text
 
 
 
@@ -61,6 +67,14 @@ TARGETS=['empathy', 'distress']
 FEATURES_MATRIX=fe.embedding_matrix(data.essay, embs, common.TIMESTEPS)
 FEATURES_CENTROID=fe.embedding_centroid(data.essay, embs)
 
+# Get tokens and their features, for predicting word ratings from embeddings.
+TOKENS=list(set([token.lower() for essay in data.essay for token in tokenize(essay)]))
+TOKENS_CENTROID=fe.embedding_centroid(TOKENS, embs)
+
+# Save tokens, token centroids, and feature centroids for SHAP.
+np.save('results/{}_tokens'.format(dataset) , TOKENS)
+np.save('results/{}_tokens_centroid'.format(dataset), TOKENS_CENTROID)
+np.save('results/features_centroid'.format(dataset), FEATURES_CENTROID)
 # LABELS={
 # 	'empathy':{'classification':'empathy_bin', 'regression':'empathy'},
 # 	'distress':{'classification':'distress_bin', 'regression':'distress'}
@@ -118,6 +132,7 @@ performancens={name:pd.DataFrame(columns=['empathy', 'distress'],
 
 
 
+"""
 
 kf_iterator=KFold(n_splits=num_splits, shuffle=True, random_state=42)
 for i, splits in enumerate(kf_iterator.split(data)):
@@ -186,7 +201,37 @@ for i, splits in enumerate(kf_iterator.split(data)):
 			# print(results_df)
 			performancens[model_name].loc[i+1,target]=result
 			print(performancens[model_name])
+"""
 
+# Set random seed for reproducibility.
+np.random.seed(42)
+
+for target in TARGETS:
+	k.clear_session()
+	print(target)
+
+	# Focus only on FFN, which easily maps between features and words.
+	model=MODELS['ffn']()
+
+	# Train on all features.
+	model.fit(FEATURES_CENTROID,
+			data[target],
+			epochs=200,
+			validation_split=.1,
+			batch_size=32,
+			callbacks=[early_stopping])
+
+	# Save model for SHAP.
+	model.save('results/model_{}.5'.format(target))
+
+	# Predict ratings for tokens.
+	pred=model.predict(TOKENS_CENTROID)[:, 0]
+
+	# Save ratings as DataFrame.
+	ratings={'tokens': TOKENS, 'ratings': pred}
+	ratings_df=pd.DataFrame.from_dict(ratings)
+	ratings_df=ratings_df[['tokens', 'ratings']]
+	ratings_df.to_csv('results/{}.tsv'.format(target), sep='\t')
 
 
 #average results data frame
