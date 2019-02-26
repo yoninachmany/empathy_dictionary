@@ -74,7 +74,7 @@ TOKENS_CENTROID=fe.embedding_centroid(TOKENS, embs)
 # Save tokens, token centroids, and feature centroids for SHAP.
 np.save('results/{}_tokens'.format(dataset) , TOKENS)
 np.save('results/{}_tokens_centroid'.format(dataset), TOKENS_CENTROID)
-np.save('results/features_centroid'.format(dataset), FEATURES_CENTROID)
+np.save('results/{}_features_centroid'.format(dataset), FEATURES_CENTROID)
 # LABELS={
 # 	'empathy':{'classification':'empathy_bin', 'regression':'empathy'},
 # 	'distress':{'classification':'distress_bin', 'regression':'distress'}
@@ -231,7 +231,7 @@ for target in TARGETS:
 	ratings={'tokens': TOKENS, 'ratings': pred}
 	ratings_df=pd.DataFrame.from_dict(ratings)
 	ratings_df=ratings_df[['tokens', 'ratings']]
-	ratings_df.to_csv('results/{}.tsv'.format(target), sep='\t')
+	ratings_df.to_csv('results/{}_ratings.tsv'.format(target), sep='\t')
 
 
 """
