@@ -139,7 +139,8 @@ for i, splits in enumerate(kf_iterator.split(data)):
 	train,test=splits
 
 	for test_id in test:
-		id_to_test_fold["id"].append(data["id"][test_id])
+		id_key = "id" if dataset == "vad" else "message_id"
+		id_to_test_fold["id"].append(data[id_key][test_id])
 		id_to_test_fold["test_fold"].append(i)
 
 	k.clear_session()
