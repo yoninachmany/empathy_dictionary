@@ -132,11 +132,15 @@ performancens={name:pd.DataFrame(columns=['empathy', 'distress'],
 
 
 
-"""
+id_to_test_fold = {"id": [], "test_fold": []}
 
 kf_iterator=KFold(n_splits=num_splits, shuffle=True, random_state=42)
 for i, splits in enumerate(kf_iterator.split(data)):
 	train,test=splits
+
+	for test_id in test:
+		id_to_test_fold["id"].append(data["id"][test_id])
+		id_to_test_fold["test_fold"].append(i)
 
 	k.clear_session()
 
@@ -153,11 +157,12 @@ for i, splits in enumerate(kf_iterator.split(data)):
 		features_test_matrix=FEATURES_MATRIX[test]
 
 
-		print(labels_train)
-		print(features_train_matrix)
+		# print(labels_train)
+		# print(features_train_matrix)
 
-		for model_name, model_fun in MODELS.items():
-			print(model_name)
+		for j in range(1):
+			model_name = 'ffn'
+			model_fun = MODELS[model_name]
 			model=model_fun()
 
 
@@ -185,22 +190,40 @@ for i, splits in enumerate(kf_iterator.split(data)):
 			else:
 				raise ValueError('Unkown model name encountered.')
 
+
+			tokens_test = list(set([token.lower() for essay in data.essay[test] for token in tokenize(essay)]))
+			tokens_test_centroid = fe.embedding_centroid(tokens_test, embs)
+
+			# Predict ratings for tokens.
+			pred = model.predict(tokens_test_centroid)[:, 0]
+
+			# Save ratings as DataFrame.
+			ratings = {'tokens': tokens_test, 'ratings': pred}
+			ratings_df = pd.DataFrame.from_dict(ratings)
+			ratings_df = ratings_df[['tokens', 'ratings']]
+			ratings_df.to_csv('results/{}_ratings_{}.tsv'.format(target, i),
+							  sep='\t')
+
+
 			#	PREDICTION
-			if model_name=='cnn':
-				pred=model.predict(features_test_matrix)
-			else:
-				pred=model.predict(features_test_centroid)
+			# if model_name=='cnn':
+			# 	pred=model.predict(features_test_matrix)
+			# else:
+			# 	pred=model.predict(features_test_centroid)
 
 			#	SCORING
-			result=correlation(true=labels_test, pred=pred)
+			# result=correlation(true=labels_test, pred=pred)
 
 			#	RECORD
 			# row=model_name
 			# column=LABELS[target][problem]
 			# results_df.loc[row,column]=result
 			# print(results_df)
-			performancens[model_name].loc[i+1,target]=result
-			print(performancens[model_name])
+			# performancens[model_name].loc[i+1,target]=result
+			# print(performancens[model_name])
+
+id_to_test_fold_df = pd.DataFrame.from_dict(id_to_test_fold)
+id_to_test_fold_df.to_csv('results/{}_id_to_test_fold.tsv'.format(dataset), sep='\t')
 """
 
 # Set random seed for reproducibility.
@@ -232,7 +255,7 @@ for target in TARGETS:
 	ratings_df=pd.DataFrame.from_dict(ratings)
 	ratings_df=ratings_df[['tokens', 'ratings']]
 	ratings_df.to_csv('results/{}_ratings.tsv'.format(target), sep='\t')
-
+"""
 
 """
 #average results data frame
