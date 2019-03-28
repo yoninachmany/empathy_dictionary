@@ -141,6 +141,7 @@ kf_iterator=KFold(n_splits=num_splits, shuffle=True, random_state=42)
 for i, splits in enumerate(kf_iterator.split(data)):
 	train,test=splits
 
+	# For all texts in the test set, add mapping from id to the current fold.
 	for test_id in test:
 		id_key = "id" if dataset == "vad" else "message_id"
 		id_to_test_fold["id"].append(data[id_key][test_id])
