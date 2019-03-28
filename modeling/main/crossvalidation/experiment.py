@@ -240,6 +240,7 @@ id_to_test_fold_df.to_csv('results/{}_id_to_test_fold.tsv'.format(dataset), sep=
 np.random.seed(42)
 
 for target in TARGETS:
+	# clear_session() was done outside loop when there was an outer loop.
 	k.clear_session()
 	print(target)
 
