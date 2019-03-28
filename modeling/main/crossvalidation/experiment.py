@@ -165,6 +165,7 @@ for i, splits in enumerate(kf_iterator.split(data)):
 		# print(labels_train)
 		# print(features_train_matrix)
 
+		# Hack to not de-indent body of for loop when only using FFN model.
 		for j in range(1):
 			model_name = 'ffn'
 			model_fun = MODELS[model_name]
