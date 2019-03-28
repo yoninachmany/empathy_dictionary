@@ -258,7 +258,7 @@ for target in TARGETS:
 	# Save model for SHAP.
 	model.save('results/model_{}.h5'.format(target))
 
-	# Predict ratings for tokens.
+	# Predict ratings for all tokens.
 	pred=model.predict(TOKENS_CENTROID)[:, 0]
 
 	# Save ratings as DataFrame.
