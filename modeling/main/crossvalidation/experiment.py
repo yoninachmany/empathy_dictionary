@@ -134,6 +134,7 @@ performancens={name:pd.DataFrame(columns=['empathy', 'distress'],
 	index=range(1,num_splits+1)) for name in MODELS.keys()}
 
 
+
 # Save the fold for which the text appears in the test set, for other methods.
 id_to_test_fold = {"id": [], "test_fold": []}
 
@@ -231,6 +232,8 @@ for i, splits in enumerate(kf_iterator.split(data)):
 # Write the mapping from text id to fold for which it appears in test set, for other methods.
 id_to_test_fold_df = pd.DataFrame.from_dict(id_to_test_fold)
 id_to_test_fold_df.to_csv('results/{}_id_to_test_fold.tsv'.format(dataset), sep='\t')
+
+# Comment back in to get the full lexica.
 """
 
 # Set random seed for reproducibility.
