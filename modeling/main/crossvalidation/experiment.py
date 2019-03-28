@@ -74,6 +74,7 @@ TOKENS=list(set([token.lower() for essay in data.essay for token in tokenize(ess
 TOKENS_CENTROID=fe.embedding_centroid(TOKENS, embs)
 
 # Save tokens, token centroids, and feature centroids for SHAP.
+# See https://github.com/slundberg/shap/blob/master/notebooks/deep_explainer/Keras%20LSTM%20for%20IMDB%20Sentiment%20Classification.ipynb.
 np.save('results/{}_tokens'.format(dataset) , TOKENS)
 np.save('results/{}_tokens_centroid'.format(dataset), TOKENS_CENTROID)
 np.save('results/{}_features_centroid'.format(dataset), FEATURES_CENTROID)
