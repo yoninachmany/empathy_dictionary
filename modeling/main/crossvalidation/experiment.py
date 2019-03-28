@@ -228,6 +228,7 @@ for i, splits in enumerate(kf_iterator.split(data)):
 			# performancens[model_name].loc[i+1,target]=result
 			# print(performancens[model_name])
 
+# Write the mapping from text id to fold for which it appears in test set, for other methods.
 id_to_test_fold_df = pd.DataFrame.from_dict(id_to_test_fold)
 id_to_test_fold_df.to_csv('results/{}_id_to_test_fold.tsv'.format(dataset), sep='\t')
 """
