@@ -9,6 +9,7 @@ import numpy as np
 import keras
 from sklearn.linear_model import RidgeCV, LogisticRegressionCV
 from sklearn.model_selection import KFold
+# To get word-level ratings, will need to tokenize texts.
 from nltk.tokenize import wordpunct_tokenize as tokenize
 
 ## extra imports to set GPU options
