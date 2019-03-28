@@ -134,7 +134,7 @@ performancens={name:pd.DataFrame(columns=['empathy', 'distress'],
 	index=range(1,num_splits+1)) for name in MODELS.keys()}
 
 
-
+# Save the fold for which the text appears in the test set, for other methods.
 id_to_test_fold = {"id": [], "test_fold": []}
 
 kf_iterator=KFold(n_splits=num_splits, shuffle=True, random_state=42)
