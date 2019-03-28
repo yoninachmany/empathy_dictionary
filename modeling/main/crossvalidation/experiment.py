@@ -54,6 +54,7 @@ TARGETS=['empathy', 'distress']
 
 if dataset == 'vad_eb':
 	TARGETS=['V', 'A', 'D']
+	# data.essay used later
 	data['essay']=data.text
 
 
