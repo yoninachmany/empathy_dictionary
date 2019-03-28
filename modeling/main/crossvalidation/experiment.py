@@ -236,7 +236,7 @@ id_to_test_fold_df.to_csv('results/{}_id_to_test_fold.tsv'.format(dataset), sep=
 # Comment back in to get the full lexica.
 """
 
-# Set random seed for reproducibility.
+# Set random seed for reproducibility, like random_state in the KFold.
 np.random.seed(42)
 
 for target in TARGETS:
