@@ -196,11 +196,11 @@ for i, splits in enumerate(kf_iterator.split(data)):
 			else:
 				raise ValueError('Unkown model name encountered.')
 
-
+			# Get tokens in test texts to predict on, with model trained on train texts.
 			tokens_test = list(set([token.lower() for essay in data.essay[test] for token in tokenize(essay)]))
 			tokens_test_centroid = fe.embedding_centroid(tokens_test, embs)
 
-			# Predict ratings for tokens.
+			# Predict ratings for test tokens.
 			pred = model.predict(tokens_test_centroid)[:, 0]
 
 			# Save ratings as DataFrame.
