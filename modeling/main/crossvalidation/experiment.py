@@ -113,7 +113,7 @@ early_stopping=keras.callbacks.EarlyStopping(monitor='val_loss',
 
 num_splits=10
 
-performancens={name:pd.DataFrame(columns=['Empathy', 'Distress'],
+performancens={name:pd.DataFrame(columns=['empathy', 'distress'],
 	index=range(1,num_splits+1)) for name in MODELS.keys()}
 
 
