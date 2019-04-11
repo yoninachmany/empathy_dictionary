@@ -72,15 +72,15 @@ FEATURES_CENTROID=fe.embedding_centroid(data.essay, embs)
 
 # Get (lowercase) tokens and their features, for predicting word ratings from embeddings.
 TOKENS_ESSAYS=[tokenize(essay.lower()) for essay in data.essay]
-print(TOKENS_ESSAYS.shape)
+print(len(TOKENS_ESSAYS))
 unigrams = set([ngrams(tokens) for tokens in TOKENS_ESSAYS])
-print(unigrams.shape)
+print(len(unigrams))
 bigrams = set([ngrams(tokens, 2) for tokens in TOKENS_ESSAYS])
-print(bigrams.shape)
+print(len(bigrams))
 trigrams = set([ngrams(tokens, 3) for tokens in TOKENS_ESSAYS])
-print(trigrams.shape)
+print(len(trigrams))
 TOKENS = list(unigrams.union(bigrams).union(trigrams))
-print(TOKENS.shape)
+print(len(TOKENS))
 TOKENS_CENTROID=fe.embedding_centroid(TOKENS, embs)
 
 # Save tokens, token centroids, and feature centroids for SHAP.
