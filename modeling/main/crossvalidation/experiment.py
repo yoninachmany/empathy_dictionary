@@ -11,6 +11,7 @@ from sklearn.linear_model import RidgeCV, LogisticRegressionCV
 from sklearn.model_selection import KFold
 # To get word-level ratings, will need to tokenize texts.
 from nltk.tokenize import wordpunct_tokenize as tokenize
+from nltk.util import ngrams
 
 ## extra imports to set GPU options
 import tensorflow as tf
@@ -70,7 +71,16 @@ FEATURES_MATRIX=fe.embedding_matrix(data.essay, embs, common.TIMESTEPS)
 FEATURES_CENTROID=fe.embedding_centroid(data.essay, embs)
 
 # Get (lowercase) tokens and their features, for predicting word ratings from embeddings.
-TOKENS=list(set([token.lower() for essay in data.essay for token in tokenize(essay)]))
+TOKENS_ESSAYS=[tokenize(essay.lower()) for essay in data.essay]
+print(TOKENS_ESSAYS.shape)
+unigrams = set([ngrams(tokens) for tokens in TOKENS_ESSAYS])
+print(unigrams.shape)
+bigrams = set([ngrams(tokens, 2) for tokens in TOKENS_ESSAYS])
+print(bigrams.shape)
+trigrams = set([ngrams(tokens, 3) for tokens in TOKENS_ESSAYS])
+print(trigrams.shape)
+TOKENS = list(unigrams.union(bigrams).union(trigrams))
+print(TOKENS.shape)
 TOKENS_CENTROID=fe.embedding_centroid(TOKENS, embs)
 
 # Save tokens, token centroids, and feature centroids for SHAP.
@@ -134,7 +144,7 @@ performancens={name:pd.DataFrame(columns=['empathy', 'distress'],
 	index=range(1,num_splits+1)) for name in MODELS.keys()}
 
 
-
+"""
 # Save the fold for which the text appears in the test set, for other methods.
 id_to_test_fold = {"id": [], "test_fold": []}
 
@@ -232,9 +242,9 @@ for i, splits in enumerate(kf_iterator.split(data)):
 # Write the mapping from text id to fold for which it appears in test set, for other methods.
 id_to_test_fold_df = pd.DataFrame.from_dict(id_to_test_fold)
 id_to_test_fold_df.to_csv('results/{}_id_to_test_fold.tsv'.format(dataset), sep='\t')
-
-# Comment back in to get the full lexica.
 """
+# Comment back in to get the full lexica.
+
 
 # Set random seed for reproducibility, like random_state in the KFold.
 np.random.seed(42)
@@ -256,7 +266,7 @@ for target in TARGETS:
 			callbacks=[early_stopping])
 
 	# Save model for SHAP.
-	model.save('results/model_{}.h5'.format(target))
+	# model.save('results/model_{}.h5'.format(target))
 
 	# Predict ratings for all tokens.
 	pred=model.predict(TOKENS_CENTROID)[:, 0]
@@ -266,7 +276,7 @@ for target in TARGETS:
 	ratings_df=pd.DataFrame.from_dict(ratings)
 	ratings_df=ratings_df[['tokens', 'ratings']]
 	ratings_df.to_csv('results/{}_ratings.tsv'.format(target), sep='\t')
-"""
+
 
 """
 #average results data frame
