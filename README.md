@@ -1,6 +1,6 @@
 # Empathy Dictionary
 
-This repository contains the datasets, experimental code and results presented in our ACL 2019.
+This repository contains the dataset, experimental code and results presented in our ACL 2019.
 
 
 ## Dataset
