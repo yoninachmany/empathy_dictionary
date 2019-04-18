@@ -3,7 +3,7 @@
 This repository contains the datasets, experimental code and results presented in our ACL 2019.
 
 
-## Empathic Reactions Dataset
+## Dataset
 Our dataset comprises 1860 short texts together with ratings for two kinds of empathic states, empathic concern and personal distress. It is, to our knowledge, the first publicly available gold standard for NLP-based empathy prediction. The `csv`-formatted data can be found [here](data/responses/data/messages.csv). For details regarding our annotation methodology please refer to the [paper](https://arxiv.org/pdf/1808.10399.pdf).
 
 ## Re-Running the Experiments
@@ -14,6 +14,8 @@ Please note that re-running our code will produce varying results due to racing 
 The necessary FastText word vectors can be found [here](https://fasttext.cc/docs/en/english-vectors.html).
 
 Once everything is set up, executing `run_experiments.sh` will re-run our cross-validation experiment. The results will be stored in `modeling/main/crossvalidation/results`.
+
+## Paper
 
 You can find our Overleaf document [here](https://www.overleaf.com/9126915636cgjnxkdzmhkv).
 
