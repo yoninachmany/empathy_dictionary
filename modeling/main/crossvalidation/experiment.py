@@ -118,7 +118,7 @@ performancens={name:pd.DataFrame(columns=['empathy', 'distress'],
 
 
 
-
+"""
 kf_iterator=KFold(n_splits=num_splits, shuffle=True, random_state=42)
 for i, splits in enumerate(kf_iterator.split(data)):
 	train,test=splits
@@ -201,8 +201,30 @@ for key, performance in performancens.items():
 	performance.to_csv('results/{}.tsv'.format(key), sep='\t')
 
 # results_df.to_csv('results.tsv', sep='\t')
+"""
 
-
-
+# Comment back in to get the full lexica.
+# Set random seed for reproducibility, like random_state in the KFold.
+np.random.seed(42)
+for target in TARGETS:
+	# clear_session() was done outside loop when there was an outer loop.
+	k.clear_session()
+	print(target)
+	# Focus only on FFN, which easily maps between features and words.
+	model=MODELS['ffn']()
+	# Train on all features.
+	model.fit(FEATURES_CENTROID,
+			data[target],
+			epochs=200,
+			validation_split=.1,
+			batch_size=32,
+			callbacks=[early_stopping])
+	# Predict ratings for all tokens.
+	pred=model.predict(FEATURES_CENTROID)[:, 0]
+	# Save ratings as DataFrame.
+	ratings={'essays': data.essay, 'ratings': pred}
+	ratings_df=pd.DataFrame.from_dict(ratings)
+	ratings_df=ratings_df[['essays', 'ratings']]
+	ratings_df.to_csv('results/{}_ratings.tsv'.format(target), sep='\t')
 
 
