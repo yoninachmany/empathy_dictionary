@@ -58,8 +58,8 @@ TARGETS=['empathy', 'distress']
 # features_test_centroid=fe.embedding_centroid(test.essay, embs)
 # features_test_matrix=fe.embedding_matrix(test.essay, embs, common.TIMESTEPS)
 
-FEATURES_MATRIX=fe.embedding_matrix(data.essay, embs, common.TIMESTEPS)
-FEATURES_CENTROID=fe.embedding_centroid(data.essay, embs)
+FEATURES_MATRIX=fe.embedding_matrix(data.text, embs, common.TIMESTEPS)
+FEATURES_CENTROID=fe.embedding_centroid(data.text, embs)
 
 # LABELS={
 # 	'empathy':{'classification':'empathy_bin', 'regression':'empathy'},
@@ -113,7 +113,7 @@ early_stopping=keras.callbacks.EarlyStopping(monitor='val_loss',
 
 num_splits=10
 
-performancens={name:pd.DataFrame(columns=['empathy', 'distress'], 
+performancens={name:pd.DataFrame(columns=['empathy', 'distress'],
 	index=range(1,num_splits+1)) for name in MODELS.keys()}
 
 
