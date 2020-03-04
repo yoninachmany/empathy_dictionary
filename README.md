@@ -1,10 +1,10 @@
-# Empathic Reactions
+# Empathy Dictionary
 
-This repository contains the dataset, experimental code and results presented in our EMNLP 2018.
+This repository contains the dataset, experimental code and results presented in our EMNLP 2019.
 
 
 ## Dataset
-Our dataset comprises 1860 short texts together with ratings for two kinds of empathic states, empathic concern and personal distress. It is, to our knowledge, the first publicly available gold standard for NLP-based empathy prediction. The `csv`-formatted data can be found [here](data/responses/data/messages.csv). For details regarding our annotation methodology please refer to the paper.
+Our dataset comprises 1860 short texts together with ratings for two kinds of empathic states, empathic concern and personal distress. It is, to our knowledge, the first publicly available gold standard for NLP-based empathy prediction. The `csv`-formatted data can be found [here](data/responses/data/messages.csv). For details regarding our annotation methodology please refer to the [paper](https://arxiv.org/pdf/1808.10399.pdf).
 
 ## License
 Our dataset is available under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
@@ -18,18 +18,9 @@ The necessary FastText word vectors can be found [here](https://fasttext.cc/docs
 
 Once everything is set up, executing `run_experiments.sh` will re-run our cross-validation experiment. The results will be stored in `modeling/main/crossvalidation/results`.
 
-## Paper & Citation
+## Paper
 
-```
-@inproceedings{Buechel18emnlp,
-author={Buechel, Sven and Buffone, Anneke and Slaff, Barry and Ungar, Lyle and Sedoc, Jo{\~{a}}o},
-title = {Modeling Empathy and Distress in Reaction to News Stories},
-year = {2018}
-booktitle = {Proceedings of the 2018 Conference on Empirical Methods in Natural Language Processing (EMNLP 2018)}
-}
-```
-
-You can find our arXiv preprint [here](https://arxiv.org/pdf/1808.10399.pdf).
+You can find our Overleaf document [here](https://www.overleaf.com/9126915636cgjnxkdzmhkv).
 
 ## Contact
-I am happy to give additional information or get feedback about our work via email: sven.buechel@uni-jena.de
+I am happy to give additional information or get feedback about our work via email: joao@seas.upenn.edu

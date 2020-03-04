@@ -9,6 +9,8 @@ import numpy as np
 import keras
 from sklearn.linear_model import RidgeCV, LogisticRegressionCV
 from sklearn.model_selection import KFold
+# To get word-level ratings, will need to tokenize texts.
+from nltk.tokenize import wordpunct_tokenize as tokenize
 
 ## extra imports to set GPU options
 import tensorflow as tf
@@ -45,9 +47,15 @@ results_df=pd.DataFrame(
 
 embs=common.get_facebook_fasttext_common_crawl(vocab_limit=None)
 
+# Based on column names in df, determine if empathy/vad.
+dataset = 'vad_eb' if 'text' in data else 'empathy'
 TARGETS=['empathy', 'distress']
 
 
+if dataset == 'vad_eb':
+	TARGETS=['V', 'A', 'D']
+	# data.essay used later
+	data['essay']=data.text
 
 
 
@@ -61,6 +69,15 @@ TARGETS=['empathy', 'distress']
 FEATURES_MATRIX=fe.embedding_matrix(data.essay, embs, common.TIMESTEPS)
 FEATURES_CENTROID=fe.embedding_centroid(data.essay, embs)
 
+# Get (lowercase) tokens and their features, for predicting word ratings from embeddings.
+TOKENS=list(set([token.lower() for essay in data.essay for token in tokenize(essay)]))
+TOKENS_CENTROID=fe.embedding_centroid(TOKENS, embs)
+
+# Save tokens, token centroids, and feature centroids for SHAP.
+# See https://github.com/slundberg/shap/blob/master/notebooks/deep_explainer/Keras%20LSTM%20for%20IMDB%20Sentiment%20Classification.ipynb.
+np.save('results/{}_tokens'.format(dataset) , TOKENS)
+np.save('results/{}_tokens_centroid'.format(dataset), TOKENS_CENTROID)
+np.save('results/{}_features_centroid'.format(dataset), FEATURES_CENTROID)
 # LABELS={
 # 	'empathy':{'classification':'empathy_bin', 'regression':'empathy'},
 # 	'distress':{'classification':'distress_bin', 'regression':'distress'}
@@ -118,10 +135,18 @@ performancens={name:pd.DataFrame(columns=['empathy', 'distress'],
 
 
 
+# Save the fold for which the text appears in the test set, for other methods.
+id_to_test_fold = {"id": [], "test_fold": []}
 
 kf_iterator=KFold(n_splits=num_splits, shuffle=True, random_state=42)
 for i, splits in enumerate(kf_iterator.split(data)):
 	train,test=splits
+
+	# For all texts in the test set, add mapping from id to the current fold.
+	for test_id in test:
+		id_key = "id" if dataset == "vad" else "message_id"
+		id_to_test_fold["id"].append(data[id_key][test_id])
+		id_to_test_fold["test_fold"].append(i)
 
 	k.clear_session()
 
@@ -138,11 +163,13 @@ for i, splits in enumerate(kf_iterator.split(data)):
 		features_test_matrix=FEATURES_MATRIX[test]
 
 
-		print(labels_train)
-		print(features_train_matrix)
+		# print(labels_train)
+		# print(features_train_matrix)
 
-		for model_name, model_fun in MODELS.items():
-			print(model_name)
+		# Hack to not de-indent body of for loop when only using FFN model.
+		for j in range(1):
+			model_name = 'ffn'
+			model_fun = MODELS[model_name]
 			model=model_fun()
 
 
@@ -170,25 +197,78 @@ for i, splits in enumerate(kf_iterator.split(data)):
 			else:
 				raise ValueError('Unkown model name encountered.')
 
+			# Get tokens in test texts to predict on, with model trained on train texts.
+			tokens_test = list(set([token.lower() for essay in data.essay[test] for token in tokenize(essay)]))
+			tokens_test_centroid = fe.embedding_centroid(tokens_test, embs)
+
+			# Predict ratings for test tokens.
+			pred = model.predict(tokens_test_centroid)[:, 0]
+
+			# Save ratings as DataFrame.
+			ratings = {'tokens': tokens_test, 'ratings': pred}
+			ratings_df = pd.DataFrame.from_dict(ratings)
+			ratings_df = ratings_df[['tokens', 'ratings']]
+			ratings_df.to_csv('results/{}_ratings_{}.tsv'.format(target, i),
+							  sep='\t')
+
+
 			#	PREDICTION
-			if model_name=='cnn':
-				pred=model.predict(features_test_matrix)
-			else:
-				pred=model.predict(features_test_centroid)
+			# if model_name=='cnn':
+			# 	pred=model.predict(features_test_matrix)
+			# else:
+			# 	pred=model.predict(features_test_centroid)
 
 			#	SCORING
-			result=correlation(true=labels_test, pred=pred)
+			# result=correlation(true=labels_test, pred=pred)
 
 			#	RECORD
 			# row=model_name
 			# column=LABELS[target][problem]
 			# results_df.loc[row,column]=result
 			# print(results_df)
-			performancens[model_name].loc[i+1,target]=result
-			print(performancens[model_name])
+			# performancens[model_name].loc[i+1,target]=result
+			# print(performancens[model_name])
 
+# Write the mapping from text id to fold for which it appears in test set, for other methods.
+id_to_test_fold_df = pd.DataFrame.from_dict(id_to_test_fold)
+id_to_test_fold_df.to_csv('results/{}_id_to_test_fold.tsv'.format(dataset), sep='\t')
 
+# Comment back in to get the full lexica.
+"""
 
+# Set random seed for reproducibility, like random_state in the KFold.
+np.random.seed(42)
+
+for target in TARGETS:
+	# clear_session() was done outside loop when there was an outer loop.
+	k.clear_session()
+	print(target)
+
+	# Focus only on FFN, which easily maps between features and words.
+	model=MODELS['ffn']()
+
+	# Train on all features.
+	model.fit(FEATURES_CENTROID,
+			data[target],
+			epochs=200,
+			validation_split=.1,
+			batch_size=32,
+			callbacks=[early_stopping])
+
+	# Save model for SHAP.
+	model.save('results/model_{}.h5'.format(target))
+
+	# Predict ratings for all tokens.
+	pred=model.predict(TOKENS_CENTROID)[:, 0]
+
+	# Save ratings as DataFrame.
+	ratings={'tokens': TOKENS, 'ratings': pred}
+	ratings_df=pd.DataFrame.from_dict(ratings)
+	ratings_df=ratings_df[['tokens', 'ratings']]
+	ratings_df.to_csv('results/{}_ratings.tsv'.format(target), sep='\t')
+"""
+
+"""
 #average results data frame
 if not os.path.isdir('results'):
 	os.makedirs('results')
@@ -202,6 +282,7 @@ for key, performance in performancens.items():
 
 # results_df.to_csv('results.tsv', sep='\t')
 
+"""
 
 
 

@@ -9,6 +9,7 @@ responses_raw=jn(root,'data','responses','data','qualtrics_download_2018-05-16-1
 responses=root+'/data/responses/data/responses.csv'
 responses_to_exclude=root+'/data/responses/data/exclude_responses.txt'
 messages=root+'/data/responses/data/messages.csv'
+#messages=root+'/data/responses/data/emobank.csv'
 articles=jn(root, 'data', 'responses', 'data', 'articles.csv')
 articles_raw=root+'/data/stimulus/data/empathynewsarticles_all.txt' # original source of articles provided by Joao 
 articles_data=root+'/data/stimulus/data/articles_raw_data.csv'
